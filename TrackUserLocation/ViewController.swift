@@ -48,8 +48,8 @@ class ViewController: UIViewController {
             break
        
         case .denied:
-            let Alert = UIAlertController(title: "Turn on location settings to continue", message: "1. Select Location\n 2. Tap on Always or While Using", preferredStyle: .actionSheet)
-            let gotoAction = UIAlertAction(title: "Go To Settings", style: .default, handler: nil)
+            let Alert = UIAlertController(title: "Turn on location settings to continue", message: "1. Select Location\n 2. Tap on While Using the App", preferredStyle: .actionSheet)
+            let gotoAction = UIAlertAction(title: "Go to Settings", style: .default, handler:gotoSettingsHandler)
             let noThanksAction = UIAlertAction(title: "No Thanks", style: .cancel, handler: nil)
             Alert.addAction(gotoAction)
             Alert.addAction(noThanksAction)
@@ -62,12 +62,23 @@ class ViewController: UIViewController {
             break
             
         case .restricted:
-            //show an alert letting them know what's up
+            //Do something if permission is restricted
             break
             
         case .authorizedAlways:
             break
             
+        }
+    }
+    
+    
+    //navigate to application setttings page if location is not enabled
+    func gotoSettingsHandler(alert: UIAlertAction){
+        guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {return}
+        if UIApplication.shared.canOpenURL(settingsUrl) {
+            UIApplication.shared.open(settingsUrl, completionHandler: { (success) in
+            //settings page opened successfully
+            })
         }
     }
     
@@ -105,6 +116,7 @@ extension ViewController: CLLocationManagerDelegate{
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
       
         guard let location = locations.last else { return }
+        print("\nUser location updated:\nLat:\(location.coordinate.latitude)\nLng:\(location.coordinate.longitude)")
         let center = CLLocationCoordinate2D(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
         let region = MKCoordinateRegion.init(center: center, latitudinalMeters: regionInMeters, longitudinalMeters: regionInMeters)
         mapView.setRegion(region, animated: true)
